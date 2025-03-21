@@ -18,7 +18,7 @@ DEFINE_EVENT_TYPE(wxEVT_TABLEUPDATED)
 DEFINE_EVENT_TYPE(wxEVT_TABLEDELETED)
 
 CMainFrame* pframeMain = NULL;
-map<string, string> mapAddressBook;
+map<string, string> mapAddressBook; // µØÖ·ºÍÃû³ÆµÄÓ³Éä£¬ÆäÖÐkeyÎªµØÖ·£¬valueÎªÃû³Æ
 
 
 void ThreadRequestProductDetails(void* parg);
@@ -251,7 +251,9 @@ void AddPendingReplyEvent3(void* pevthandler, CDataStream& vRecv)
 CDataStream GetStreamFromEvent(const wxCommandEvent& event)
 {
     wxString strData = event.GetString();
-    return CDataStream(strData.begin(), strData.begin() + event.GetInt(), SER_NETWORK);
+	const char* s = strData.mb_str();
+	return CDataStream(s, s + event.GetInt(), SER_NETWORK);
+    //return CDataStream(strData.begin(), strData.begin() + event.GetInt(), SER_NETWORK);
 }
 
 
@@ -1185,8 +1187,8 @@ CTxDetailsDialog::CTxDetailsDialog(wxWindow* parent, CWalletTx wtx) : CTxDetails
 
 void CTxDetailsDialog::OnButtonOK(wxCommandEvent& event)
 {
-    Close();
-    //Destroy();
+    //Close();
+    Destroy();
 }
 
 
@@ -1218,12 +1220,15 @@ void COptionsDialog::OnButtonOK(wxCommandEvent& event)
     if (ParseMoney(m_textCtrlTransactionFee->GetValue(), nTransactionFee) && nTransactionFee != nPrevTransactionFee)
         CWalletDB().WriteSetting("nTransactionFee", nTransactionFee);
 
-    Close();
+    //Close();
+	EndModal(true);
+
 }
 
 void COptionsDialog::OnButtonCancel(wxCommandEvent& event)
 {
-    Close();
+    //Close();
+	EndModal(false);
 }
 
 
@@ -1242,14 +1247,15 @@ CAboutDialog::CAboutDialog(wxWindow* parent) : CAboutDialogBase(parent)
 
     // Workaround until upgrade to wxWidgets supporting UTF-8
     wxString str = m_staticTextMain->GetLabel();
-    if (str.Find('Â') != wxNOT_FOUND)
-        str.Remove(str.Find('Â'), 1);
+    if (str.Find('?') != wxNOT_FOUND)
+        str.Remove(str.Find('?'), 1);
     m_staticTextMain->SetLabel(str);
 }
 
 void CAboutDialog::OnButtonOK(wxCommandEvent& event)
 {
-    Close();
+   // Close();
+	EndModal(true);
 }
 
 
@@ -1461,7 +1467,8 @@ void CSendingDialog::OnClose(wxCloseEvent& event)
 {
     if (!event.CanVeto() || fWorkDone || fAbort || !fCanCancel)
     {
-        Close();
+        //Close();
+		EndModal(true);
     }
     else
     {
@@ -1474,7 +1481,8 @@ void CSendingDialog::OnClose(wxCloseEvent& event)
 void CSendingDialog::OnButtonOK(wxCommandEvent& event)
 {
     if (fWorkDone)
-        Close();
+        //Close();
+		EndModal(true);
 }
 
 void CSendingDialog::OnButtonCancel(wxCommandEvent& event)
@@ -1505,7 +1513,8 @@ void CSendingDialog::OnPaint(wxPaintEvent& event)
         m_buttonOK->SetFocus();
         m_buttonCancel->Enable(false);
         m_buttonCancel->SetLabel("Cancelled");
-        Close();
+        //Close();
+		EndModal(false);
         wxMessageBox("Transfer cancelled ", "Sending...", wxOK, this);
     }
     event.Skip();
@@ -1513,7 +1522,8 @@ void CSendingDialog::OnPaint(wxPaintEvent& event)
     /// debug test
     if (fRandSendTest && fWorkDone && fSuccess)
     {
-        Close();
+        //Close();
+		EndModal(true);
         Sleep(1000);
         RandSend();
     }
@@ -2645,7 +2655,8 @@ void CViewProductDialog::GetOrder(CWalletTx& wtx)
             strValue = m_textCtrlField[i]->GetValue().Trim();
         else
             strValue = m_choiceField[i]->GetStringSelection();
-        wtx.vOrderForm.push_back(make_pair(m_staticTextLabel[i]->GetLabel(), strValue));
+        //wtx.vOrderForm.push_back(make_pair(m_staticTextLabel[i]->GetLabel(), strValue));
+		wtx.vOrderForm.push_back(make_pair(m_staticTextLabel[i] ->GetLabel().ToStdString(), strValue));
     }
 }
 
@@ -2887,7 +2898,7 @@ bool CMyApp::OnInit2()
 #ifdef _MSC_VER
     // Turn off microsoft heap dump noise for now
     _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
-    _CrtSetReportFile(_CRT_WARN, CreateFile("NUL", GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, 0));
+    _CrtSetReportFile(_CRT_WARN, CreateFile(L"NUL", GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, 0));
 #endif
 
     //// debug print
@@ -2910,7 +2921,7 @@ bool CMyApp::OnInit2()
         loop
         {
             // Show the previous instance and exit
-            HWND hwndPrev = FindWindow("wxWindowClassNR", "Bitcoin");
+            HWND hwndPrev = FindWindow(L"wxWindowClassNR", L"Bitcoin");
             if (hwndPrev)
             {
                 if (IsIconic(hwndPrev))
@@ -3005,6 +3016,7 @@ bool CMyApp::OnInit2()
         return false;
     }
 
+	// ½«²»ÔÚ¿éÖÐµÄÇ®°ü½»Ò×·ÅÈëµ½¶ÔÓ¦µÄÄÚ´æ½»Ò×¶ÔÏómapTransactionsÖÐ
     // Add wallet transactions that aren't already in a block to mapTransactions
     ReacceptWalletTransactions();
 
@@ -3033,10 +3045,11 @@ bool CMyApp::OnInit2()
         pframeMain = new CMainFrame(NULL);
         pframeMain->Show();
 
+		// Æô¶¯¶ÔÓ¦½ÚµãµÄÁ´½Ó£¨½ÓÊÕÏûÏ¢ºÍ·¢ËÍÏûÏ¢£©
         if (!StartNode(strErrors))
             wxMessageBox(strErrors);
 
-        if (fGenerateBitcoins)
+        if (fGenerateBitcoins) //½Úµã½øÐÐÍÚ¿ó
             if (_beginthread(ThreadBitcoinMiner, 0, NULL) == -1)
                 printf("Error: _beginthread(ThreadBitcoinMiner) failed\n");
 
@@ -3067,7 +3080,7 @@ bool CMyApp::OnInit2()
 
         if (mapArgs.count("/randsendtest"))
         {
-            if (!mapArgs["/randsendtest"].empty())
+            if (!mapArgs["/randsendtest"].empty()) // Ëæ»ú·¢ËÍ²âÊÔ£¬¿ªÆôÏß³Ì½øÐÐ´¦Àí
                 _beginthread(ThreadRandSendTest, 0, new string(mapArgs["/randsendtest"]));
             else
                 fRandSendTest = true;
@@ -3145,7 +3158,7 @@ void MainFrameRepaint()
         printf("MainFrameRepaint()\n");
         wxPaintEvent event;
         pframeMain->Refresh();
-        pframeMain->AddPendingEvent(event);
+		pframeMain->GetEventHandler()->AddPendingEvent(event);
     }
 }
 

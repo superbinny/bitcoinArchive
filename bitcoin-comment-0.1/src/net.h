@@ -9,7 +9,7 @@ class CRequestTracker;
 class CNode;
 
 
-
+// 默认端口号
 static const unsigned short DEFAULT_PORT = htons(8333);
 static const unsigned int PUBLISH_HOPS = 5;
 enum
@@ -51,15 +51,17 @@ void CheckForShutdown(int n);
 // The message start string is designed to be unlikely to occur in normal data.
 // The characters are rarely used upper ascii, not valid as UTF-8, and produce
 // a large 4-byte int at any alignment.
+// 所有的消息都共有的消息头
 static const char pchMessageStart[4] = { 0xf9, 0xbe, 0xb4, 0xd9 };
 
+// 消息头
 class CMessageHeader
 {
 public:
     enum { COMMAND_SIZE=12 };
     char pchMessageStart[sizeof(::pchMessageStart)];
-    char pchCommand[COMMAND_SIZE];
-    unsigned int nMessageSize;
+    char pchCommand[COMMAND_SIZE]; // 命令
+    unsigned int nMessageSize; // 消息内容的大小
 
     CMessageHeader()
     {
@@ -91,6 +93,7 @@ public:
             return string(pchCommand, pchCommand + COMMAND_SIZE);
     }
 
+    // 判断对应的消息头是否有效
     bool IsValid()
     {
         // Check start string
@@ -100,6 +103,7 @@ public:
         // Check the command string for errors
         for (char* p1 = pchCommand; p1 < pchCommand + COMMAND_SIZE; p1++)
         {
+            // 遇到一个为0后，其对应之后都应该为0
             if (*p1 == 0)
             {
                 // Must be all zeros after the first zero
@@ -128,7 +132,7 @@ public:
 
 
 static const unsigned char pchIPv4[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff };
-
+// 地址信息
 class CAddress
 {
 public:
@@ -141,7 +145,7 @@ public:
     unsigned int nTime;
 
     // memory only
-    unsigned int nLastFailed;
+    unsigned int nLastFailed; // 对应这个地址最近连接失败时间
 
     CAddress()
     {
@@ -297,14 +301,14 @@ public:
 
 
 
-
+// 消息类型
 enum
 {
-    MSG_TX = 1,
-    MSG_BLOCK,
-    MSG_REVIEW,
-    MSG_PRODUCT,
-    MSG_TABLE,
+    MSG_TX = 1, // 交易消息
+    MSG_BLOCK, // 块信息
+    MSG_REVIEW, //
+    MSG_PRODUCT, // 产品消息
+    MSG_TABLE,// 表
 };
 
 static const char* ppszTypeName[] =
@@ -416,7 +420,7 @@ extern uint64 nLocalServices;
 extern CAddress addrLocalHost;
 extern CNode* pnodeLocalHost;
 extern bool fShutdown;
-extern array<bool, 10> vfThreadRunning;
+extern boost::array<bool, 10> vfThreadRunning;
 extern vector<CNode*> vNodes;
 extern CCriticalSection cs_vNodes;
 extern map<vector<unsigned char>, CAddress> mapAddresses;
@@ -430,41 +434,41 @@ extern CAddress addrProxy;
 
 
 
-
+// 节点定义
 class CNode
 {
 public:
     // socket
     uint64 nServices;
     SOCKET hSocket;
-    CDataStream vSend;
-    CDataStream vRecv;
+    CDataStream vSend; // 发送缓存区
+    CDataStream vRecv; // 接收缓冲区
     CCriticalSection cs_vSend;
     CCriticalSection cs_vRecv;
-    unsigned int nPushPos;
+    unsigned int nPushPos;// 指定发送区已经发送的位置
     CAddress addr;
-    int nVersion;
-    bool fClient;
+    int nVersion; // 节点对应的版本，如果节点版本为0，则消息发送不出去
+    bool fClient;// 比较是否是客户端，如果是客户端则需要区块的头部进行校验就可以了,不需要保存整个区块的内容
     bool fInbound;
-    bool fNetworkNode;
-    bool fDisconnect;
+    bool fNetworkNode; // 设置对应的节点为网络节点，是因为从对应的本地节点列表中没有查询到
+    bool fDisconnect; // 端口链接的标记
 protected:
-    int nRefCount;
+    int nRefCount; // 使用技术器
 public:
-    int64 nReleaseTime;
+    int64 nReleaseTime; // 节点释放的时间
     map<uint256, CRequestTracker> mapRequests;
     CCriticalSection cs_mapRequests;
 
-    // flood
-    vector<CAddress> vAddrToSend;
-    set<CAddress> setAddrKnown;
+    // flood 洪泛：地址消息的命令为addr
+    vector<CAddress> vAddrToSend; // 消息需要发送对应的地址，对需要发送的地址进行已知地址的集合过滤之后再发送
+    set<CAddress> setAddrKnown; // 已知地址的集合
 
-    // inventory based relay
-    set<CInv> setInventoryKnown;
+    // inventory based relay  基于转播的库存：库存消息的命令为inv
+    set<CInv> setInventoryKnown; // 已知库存的集合
     set<CInv> setInventoryKnown2;
-    vector<CInv> vInventoryToSend;
+    vector<CInv> vInventoryToSend; //库存准备发送的集合，对库存准备发送的集合根据已知库存的集合进行过滤之后在发送
     CCriticalSection cs_inventory;
-    multimap<int64, CInv> mapAskFor;
+    multimap<int64, CInv> mapAskFor; // 咨询请求映射，key为时间（单位到微秒）
 
     // publish and subscription
     vector<char> vfSubscribe;
@@ -490,6 +494,7 @@ public:
         // Push a version message
         /// when NTP implemented, change to just nTime = GetAdjustedTime()
         int64 nTime = (fInbound ? GetAdjustedTime() : GetTime());
+		// 创建节点的时候会发送节点版本的消息：消息命令为version,后面是消息发送的内容
         PushMessage("version", VERSION, nLocalServices, nTime, addr);
     }
 
@@ -504,38 +509,39 @@ private:
     void operator=(const CNode&);
 public:
 
-
+    // 准备释放链接
     bool ReadyToDisconnect()
     {
         return fDisconnect || GetRefCount() <= 0;
     }
-
+    // 获取对应的应用计数
     int GetRefCount()
     {
         return max(nRefCount, 0) + (GetTime() < nReleaseTime ? 1 : 0);
     }
-
+    // 增加对应的应用计数
     void AddRef(int64 nTimeout=0)
     {
         if (nTimeout != 0)
-            nReleaseTime = max(nReleaseTime, GetTime() + nTimeout);
+            nReleaseTime = max(nReleaseTime, GetTime() + nTimeout); // 推迟节点对应的释放时间
         else
             nRefCount++;
     }
-
+    // 节点释放对应，则对应的应用计数减1
     void Release()
     {
         nRefCount--;
     }
 
 
-
+    // 增加库存
     void AddInventoryKnown(const CInv& inv)
     {
         CRITICAL_BLOCK(cs_inventory)
             setInventoryKnown.insert(inv);
     }
 
+    // 推送库存
     void PushInventory(const CInv& inv)
     {
         CRITICAL_BLOCK(cs_inventory)
@@ -545,17 +551,18 @@ public:
 
     void AskFor(const CInv& inv)
     {
-        // We're using mapAskFor as a priority queue,
-        // the key is the earliest time the request can be sent
+        // We're using mapAskFor as a priority queue, 优先级队列
+        // the key is the earliest time the request can be sent （key对应的是请求最早被发送的时间）
         int64& nRequestTime = mapAlreadyAskedFor[inv];
         printf("askfor %s  %I64d\n", inv.ToString().c_str(), nRequestTime);
 
+		// 确保不要时间索引让事情在同一个顺序
         // Make sure not to reuse time indexes to keep things in the same order
-        int64 nNow = (GetTime() - 1) * 1000000;
+        int64 nNow = (GetTime() - 1) * 1000000; // 单位到微秒
         static int64 nLastTime;
-        nLastTime = nNow = max(nNow, ++nLastTime);
+        nLastTime = nNow = max(nNow, ++nLastTime);//如果调用很快的话，可以保证对应的nlastTime++是的对应的时间不一样
 
-        // Each retry is 2 minutes after the last
+        // Each retry is 2 minutes after the last，没有到2分钟，则对应的nRequesttime对应的值都一样
         nRequestTime = max(nRequestTime + 2 * 60 * 1000000, nNow);
         mapAskFor.insert(make_pair(nRequestTime, inv));
     }
@@ -581,7 +588,7 @@ public:
         LeaveCriticalSection(&cs_vSend);
         printf("(aborted)\n");
     }
-
+	// 修改消息头中对应的消息大小字段
     void EndMessage()
     {
         extern int nDropMessagesTest;
@@ -595,6 +602,7 @@ public:
         if (nPushPos == -1)
             return;
 
+		// 修改消息头中对应的消息大小
         // Patch in the size
         unsigned int nSize = vSend.size() - nPushPos - sizeof(CMessageHeader);
         memcpy((char*)&vSend[nPushPos] + offsetof(CMessageHeader, nMessageSize), &nSize, sizeof(nSize));
@@ -643,6 +651,7 @@ public:
         }
     }
 
+	// 将消息发送对应节点的vsend属性中
     template<typename T1>
     void PushMessage(const char* pszCommand, const T1& a1)
     {
@@ -762,9 +771,10 @@ public:
 
 
 
-
+// 转播库存
 inline void RelayInventory(const CInv& inv)
 {
+	// 将此节点相连的所有节点进行转播此信息
     // Put on lists to offer to the other nodes
     CRITICAL_BLOCK(cs_vNodes)
         foreach(CNode* pnode, vNodes)
@@ -796,7 +806,7 @@ inline void RelayMessage<>(const CInv& inv, const CDataStream& ss)
         mapRelay[inv] = ss;
         vRelayExpiration.push_back(make_pair(GetTime() + 15 * 60, inv));
     }
-
+	// 节点进行库存转播
     RelayInventory(inv);
 }
 

@@ -10,7 +10,7 @@
 #ifdef _WIN32_WINNT
 #undef _WIN32_WINNT
 #endif
-#define _WIN32_WINNT 0x0400
+//#define _WIN32_WINNT 0x0400
 #define WIN32_LEAN_AND_MEAN 1
 #include <wx/wx.h>
 #include <wx/clipbrd.h>
@@ -20,9 +20,9 @@
 #include <openssl/rand.h>
 #include <openssl/sha.h>
 #include <openssl/ripemd.h>
-#include <windows.h>
 #include <winsock2.h>
 #include <mswsock.h>
+#include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <io.h>

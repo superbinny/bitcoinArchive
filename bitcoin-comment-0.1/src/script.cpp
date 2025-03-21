@@ -909,7 +909,7 @@ bool CheckSig(vector<unsigned char> vchSig, vector<unsigned char> vchPubKey, CSc
 
 
 
-
+// 验证交易对应的公钥是否满足下面的模板
 bool Solver(const CScript& scriptPubKey, vector<pair<opcodetype, valtype> >& vSolutionRet)
 {
     // Templates
@@ -971,7 +971,7 @@ bool Solver(const CScript& scriptPubKey, vector<pair<opcodetype, valtype> >& vSo
     return false;
 }
 
-
+// 判断对应的公钥在mapKeys是否存在对应的私钥，如果存在说明此交易是节点本身自己的交易
 bool Solver(const CScript& scriptPubKey, uint256 hash, int nHashType, CScript& scriptSigRet)
 {
     scriptSigRet.clear();
@@ -1024,7 +1024,7 @@ bool Solver(const CScript& scriptPubKey, uint256 hash, int nHashType, CScript& s
     return true;
 }
 
-
+// 判断这个交易是不是节点本身自己的交易
 bool IsMine(const CScript& scriptPubKey)
 {
     CScript scriptSig;

@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <vector>
 #include <openssl/bn.h>
+#include <openssl/ossl_typ.h>
 
 
 
@@ -51,7 +52,7 @@ class CBigNum : public BIGNUM
 public:
     CBigNum()
     {
-        BN_init(this);
+		BN_init(this);
     }
 
     CBigNum(const CBigNum& b)

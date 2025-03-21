@@ -110,7 +110,8 @@ CMainFrameBase::CMainFrameBase(wxWindow* parent, wxWindowID id, const wxString& 
     m_panel14->SetSizer(bSizer66);
     m_panel14->Layout();
     bSizer66->Fit(m_panel14);
-    bSizer3->Add(m_panel14, 1, wxEXPAND|wxALIGN_BOTTOM|wxALL, 5);
+    //bSizer3->Add(m_panel14, 1, wxEXPAND|wxALIGN_BOTTOM|wxALL, 5);
+	bSizer3->Add(m_panel14, 1, wxEXPAND | wxALL, 5);
 
 
     bSizer3->Add(0, 0, 0, wxEXPAND, 5);
@@ -353,17 +354,20 @@ COptionsDialogBase::COptionsDialogBase(wxWindow* parent, wxWindowID id, const wx
 
     m_staticText32 = new wxStaticText(this, wxID_ANY, wxT("Optional transaction fee you give to the nodes that process your transactions."), wxDefaultPosition, wxDefaultSize, 0);
     m_staticText32->Wrap(-1);
-    bSizer57->Add(m_staticText32, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    //bSizer57->Add(m_staticText32, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+	bSizer57->Add(m_staticText32, 0, wxALL, 5);
 
     wxBoxSizer* bSizer56;
     bSizer56 = new wxBoxSizer(wxHORIZONTAL);
 
     m_staticText31 = new wxStaticText(this, wxID_ANY, wxT("Transaction fee:"), wxDefaultPosition, wxDefaultSize, 0);
     m_staticText31->Wrap(-1);
-    bSizer56->Add(m_staticText31, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxLEFT, 5);
+    //bSizer56->Add(m_staticText31, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxLEFT, 5);
+	bSizer56->Add(m_staticText31, 0, wxTOP | wxBOTTOM | wxLEFT, 5);
 
     m_textCtrlTransactionFee = new wxTextCtrl(this, wxID_TRANSACTIONFEE, wxEmptyString, wxDefaultPosition, wxSize(70,-1), 0);
-    bSizer56->Add(m_textCtrlTransactionFee, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
+    //bSizer56->Add(m_textCtrlTransactionFee, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
+	bSizer56->Add(m_textCtrlTransactionFee, 0, wxALL, 5);
 
     bSizer57->Add(bSizer56, 0, wxEXPAND, 5);
 
@@ -458,7 +462,8 @@ CAboutDialogBase::CAboutDialogBase(wxWindow* parent, wxWindowID id, const wxStri
     m_buttonOK = new wxButton(this, wxID_OK, wxT("OK"), wxDefaultPosition, wxSize(85,25), 0);
     bSizer61->Add(m_buttonOK, 0, wxALL, 5);
 
-    bSizer60->Add(bSizer61, 0, wxALIGN_RIGHT|wxEXPAND, 5);
+    //bSizer60->Add(bSizer61, 0, wxALIGN_RIGHT|wxEXPAND, 5);
+	bSizer60->Add(bSizer61, 0, wxEXPAND, 5);
 
     this->SetSizer(bSizer60);
     this->Layout();
@@ -1745,7 +1750,8 @@ CGetTextFromUserDialogBase::CGetTextFromUserDialogBase(wxWindow* parent, wxWindo
 
     m_staticTextMessage1 = new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0);
     m_staticTextMessage1->Wrap(-1);
-    bSizer81->Add(m_staticTextMessage1, 0, wxTOP|wxRIGHT|wxLEFT, 5);
+    //bSizer81->Add(m_staticTextMessage1, 0, wxTOP|wxRIGHT|wxLEFT, 5);
+	bSizer81->Add(m_textCtrl1, 0, wxALL | wxEXPAND, 5);
 
     m_textCtrl1 = new wxTextCtrl(this, wxID_TEXTCTRL, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
     bSizer81->Add(m_textCtrl1, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5);
@@ -1759,7 +1765,8 @@ CGetTextFromUserDialogBase::CGetTextFromUserDialogBase(wxWindow* parent, wxWindo
     m_textCtrl2 = new wxTextCtrl(this, wxID_TEXTCTRL, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
     m_textCtrl2->Hide();
 
-    bSizer81->Add(m_textCtrl2, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5);
+    //bSizer81->Add(m_textCtrl2, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5);
+	bSizer81->Add(m_textCtrl2, 0, wxALL | wxEXPAND, 5);
 
 
     bSizer81->Add(0, 0, 1, wxEXPAND, 5);

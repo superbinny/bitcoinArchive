@@ -158,7 +158,8 @@ public:
 
 inline string i64tostr(int64 n)
 {
-    return strprintf("%"PRId64, n);
+   // return strprintf("%"PRId64, n);
+	return strprintf("%l", n);
 }
 
 inline string itostr(int n)
@@ -271,7 +272,7 @@ inline int OutputDebugStringF(const char* pszFormat, ...)
             p2++;
             char c = *p2;
             *p2 = '\0';
-            OutputDebugString(p1);
+            OutputDebugStringA(p1);
             *p2 = c;
             p1 = p2;
         }

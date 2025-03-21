@@ -696,7 +696,7 @@ struct secure_allocator : public std::allocator<T>
 class CDataStream
 {
 protected:
-    typedef vector<char, secure_allocator<char> > vector_type;
+    typedef vector<char> vector_type;
     vector_type vch;
     unsigned int nReadPos;
     short state;
@@ -737,10 +737,10 @@ public:
         Init(nTypeIn, nVersionIn);
     }
 
-    CDataStream(const vector<char>& vchIn, int nTypeIn=0, int nVersionIn=VERSION) : vch(vchIn.begin(), vchIn.end())
+   /* CDataStream(const vector<char>& vchIn, int nTypeIn=0, int nVersionIn=VERSION) : vch(vchIn.begin(), vchIn.end())
     {
         Init(nTypeIn, nVersionIn);
-    }
+    }*/
 
     CDataStream(const vector<unsigned char>& vchIn, int nTypeIn=0, int nVersionIn=VERSION) : vch((char*)&vchIn.begin()[0], (char*)&vchIn.end()[0])
     {
@@ -807,7 +807,8 @@ public:
 #if !defined(_MSC_VER) || _MSC_VER >= 1300
     void insert(iterator it, const char* first, const char* last)
     {
-        insert(it, (const_iterator)first, (const_iterator)last);
+		vector_type v(first, last);
+		insert(it, v.begin(), v.end());
     }
 #endif
 

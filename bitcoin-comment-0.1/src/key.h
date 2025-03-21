@@ -36,7 +36,7 @@ public:
 
 
 // secure_allocator is defined is serialize.h
-typedef vector<unsigned char, secure_allocator<unsigned char> > CPrivKey;
+typedef vector<unsigned char> CPrivKey;
 
 
 
